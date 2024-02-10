@@ -37,7 +37,7 @@ const server = http.createServer(async (request, response) => {
 
   switch (request.url) {
     case "/favicon.ico": {
-      fs.readFile("public/favicon.png", (err, data) => {
+      fs.readFile("favicon.png", (err, data) => {
         if (err) {
           // response.write(err);
         } else {
