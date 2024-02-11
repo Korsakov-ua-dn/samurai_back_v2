@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 
 const app = express();
-const port = process.env || 3003;
+const port = process.env.PORT || 3003;
 
 const HTTP_STATUSES = {
   OK_200: 200,
