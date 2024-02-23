@@ -25,8 +25,9 @@ const db = {
 };
 
 app.get("/", (req: Request, res: Response) => {
-  res.status(HTTP_STATUSES.OK_200);
-  res.json({ message: "<h1>Hello World!</h1>" });
+  res.sendStatus(HTTP_STATUSES.OK_200);
+  // res.status(HTTP_STATUSES.OK_200);
+  // res.json({ message: "<h1>Hello World!</h1>" });
 });
 
 app.get("/courses", (req, res) => {
