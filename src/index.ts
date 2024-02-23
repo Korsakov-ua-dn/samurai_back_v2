@@ -1,16 +1,9 @@
 import express, { Request, Response } from "express";
 
-export const app = express();
+import { HTTP_STATUSES } from "./HTTP_STATUSES";
+
+const app = express();
 const port = process.env.PORT || 3003;
-
-export const HTTP_STATUSES = {
-  OK_200: 200,
-  CREATED_201: 201,
-  NO_CONTENT_204: 204,
-
-  NOT_FOUND_404: 404,
-  BAD_REQUEST_400: 400,
-};
 
 const jsonBodyMiddleware = express.json();
 app.use(jsonBodyMiddleware);
@@ -106,3 +99,5 @@ app.delete("/__test__/data", (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+export default app;

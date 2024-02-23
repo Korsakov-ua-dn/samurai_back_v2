@@ -1,6 +1,8 @@
 import request from "supertest";
 
-import { HTTP_STATUSES, app } from "../../index";
+import app from "../..";
+
+import { HTTP_STATUSES } from "../../HTTP_STATUSES";
 
 describe("/coureses", () => {
   beforeAll(async () => {
