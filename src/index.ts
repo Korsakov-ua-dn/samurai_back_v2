@@ -18,9 +18,8 @@ const db = {
 };
 
 app.get("/", (req: Request, res: Response) => {
-  res.sendStatus(HTTP_STATUSES.OK_200);
-  // res.status(HTTP_STATUSES.OK_200);
-  // res.json({ message: "<h1>Hello World!</h1>" });
+  res.status(HTTP_STATUSES.OK_200);
+  res.json({ message: "Hello World!" });
 });
 
 app.get("/courses", (req, res) => {
