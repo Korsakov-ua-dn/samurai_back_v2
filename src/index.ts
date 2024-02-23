@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 
-const app = express();
+export const app = express();
 const port = process.env.PORT || 3003;
 
-const HTTP_STATUSES = {
+export const HTTP_STATUSES = {
   OK_200: 200,
   CREATED_201: 201,
   NO_CONTENT_204: 204,
@@ -25,24 +25,26 @@ const db = {
 };
 
 app.get("/", (req: Request, res: Response) => {
-  res.sendStatus(HTTP_STATUSES.OK_200);
+  res.status(HTTP_STATUSES.OK_200);
   res.json({ message: "<h1>Hello World!</h1>" });
 });
 
 app.get("/courses", (req, res) => {
   let courses = db.courses;
 
-  if (req.query.title) {
-    courses = courses.filter(
-      (course) => course.title.indexOf(req.query.title as string) > -1
+  if (typeof req.query.title !== "undefined") {
+    courses = courses.filter((course) =>
+      course.title.includes(req.query.title!.toString())
     );
   }
 
   res.json(courses);
 });
 
-app.get("/courses/:id", (req, res) => {
-  const course = db.courses.find((course) => course.id === +req.params.id);
+app.get("/courses/:course_id", (req, res) => {
+  const course = db.courses.find(
+    (course) => course.id === +req.params.course_id
+  );
 
   if (!course) {
     res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -67,9 +69,15 @@ app.post("/courses", (req, res) => {
 });
 
 app.delete("/courses/:id", (req, res) => {
-  db.courses = db.courses.filter((course) => course.id !== +req.params.id);
+  for (let i = 0; i < db.courses.length; i++) {
+    if (db.courses[i].id === +req.params.id) {
+      db.courses.splice(i, 1);
+      res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+      return;
+    }
+  }
 
-  res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
 });
 
 app.put("/courses/:id", (req, res) => {
@@ -86,6 +94,12 @@ app.put("/courses/:id", (req, res) => {
     course.title = req.body.title;
     res.json(course);
   }
+});
+
+app.delete("/__test__/data", (req, res) => {
+  db.courses = [];
+
+  res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 });
 
 app.listen(port, () => {
