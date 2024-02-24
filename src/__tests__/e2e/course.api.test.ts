@@ -4,6 +4,8 @@ import app from "../..";
 
 import { HTTP_STATUSES } from "../../HTTP_STATUSES";
 
+import type { TCourseViewModel } from "../../models/CourseViewModel";
+
 describe("/coureses", () => {
   beforeAll(async () => {
     await request(app).delete("/__test__/data");
@@ -26,7 +28,7 @@ describe("/coureses", () => {
     await request(app).get("/courses").expect(HTTP_STATUSES.OK_200, []);
   });
 
-  let course1: any;
+  let course1: TCourseViewModel;
   it("Should create course with correct data", async () => {
     const response = await request(app)
       .post("/courses")
@@ -43,7 +45,7 @@ describe("/coureses", () => {
     await request(app).get("/courses").expect(HTTP_STATUSES.OK_200, [course1]);
   });
 
-  let course2: any;
+  let course2: TCourseViewModel;
   it("Should create one more course", async () => {
     const response = await request(app)
       .post("/courses")
@@ -98,7 +100,10 @@ describe("/coureses", () => {
 
     await request(app)
       .get(`/courses/${course1.id}`)
-      .expect(HTTP_STATUSES.OK_200, { ...course1, title: "Back" });
+      .expect(HTTP_STATUSES.OK_200, {
+        ...course1,
+        title: "Back",
+      });
 
     await request(app)
       .get(`/courses/${course2.id}`)

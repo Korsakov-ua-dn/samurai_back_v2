@@ -1,28 +1,25 @@
 import express, { Request, Response } from "express";
 
 import { HTTP_STATUSES } from "./HTTP_STATUSES";
-import {
+import { getCourseViewModel } from "./utils/getCourseViewModel";
+
+import type {
+  TCourse,
   TRequestWithBody,
   TRequestWithParams,
   TRequestWithParamsAndBody,
 } from "./types";
-import { QueryCoursesModel } from "./models/QueryCoursesModel";
-import { CreateCourseModel } from "./models/CreateCourseModel";
-import { UpdateCourseModel } from "./models/UpdateCourseModel";
-import { TCourseViewModel } from "./models/CourseViewModel";
-import { TParamsCourseIdModel } from "./models/ParamsCourseId.Model";
+import type { TQueryCoursesModel } from "./models/QueryCoursesModel";
+import type { TCreateCourseModel } from "./models/CreateCourseModel";
+import type { TUpdateCourseModel } from "./models/UpdateCourseModel";
+import type { TCourseViewModel } from "./models/CourseViewModel";
+import type { TParamsCourseIdModel } from "./models/ParamsCourseId.Model";
 
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 5000;
 
 const jsonBodyMiddleware = express.json();
 app.use(jsonBodyMiddleware);
-
-type TCourse = {
-  id: number;
-  title: string;
-  students: number;
-};
 
 const db: { courses: TCourse[] } = {
   courses: [
@@ -44,7 +41,7 @@ app.get(
 app.get(
   "/courses",
   (
-    req: Request<{}, {}, {}, QueryCoursesModel>,
+    req: Request<{}, {}, {}, TQueryCoursesModel>,
     res: Response<TCourseViewModel[], {}>
   ) => {
     let courses = db.courses;
@@ -55,7 +52,7 @@ app.get(
       );
     }
 
-    res.json(courses.map((course) => ({ id: course.id, title: course.title })));
+    res.json(courses.map(getCourseViewModel));
   }
 );
 
@@ -70,14 +67,17 @@ app.get(
     if (!course) {
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     } else {
-      res.json({ id: course.id, title: course.title });
+      res.json(getCourseViewModel(course));
     }
   }
 );
 
 app.post(
   "/courses",
-  (req: TRequestWithBody<CreateCourseModel>, res: Response<TCourse, {}>) => {
+  (
+    req: TRequestWithBody<TCreateCourseModel>,
+    res: Response<TCourseViewModel, {}>
+  ) => {
     if (!req.body.title) {
       res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
       return;
@@ -90,7 +90,7 @@ app.post(
     };
 
     db.courses.push(course);
-    res.status(HTTP_STATUSES.CREATED_201).json(course);
+    res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
   }
 );
 
@@ -115,7 +115,7 @@ app.delete(
 app.put(
   "/courses/:id",
   (
-    req: TRequestWithParamsAndBody<TParamsCourseIdModel, UpdateCourseModel>,
+    req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
     res: Response<TCourseViewModel>
   ) => {
     if (!req.body.title) {
@@ -129,7 +129,7 @@ app.put(
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     } else {
       course.title = req.body.title;
-      res.json({ id: course.id, title: course.title });
+      res.json(getCourseViewModel(course));
     }
   }
 );

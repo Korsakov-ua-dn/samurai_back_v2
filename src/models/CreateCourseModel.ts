@@ -1,4 +1,4 @@
-export type CreateCourseModel = {
+export type TCreateCourseModel = {
   /**
    * @param title new course title
    */
