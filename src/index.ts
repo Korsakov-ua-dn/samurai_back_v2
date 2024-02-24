@@ -1,93 +1,138 @@
 import express, { Request, Response } from "express";
 
 import { HTTP_STATUSES } from "./HTTP_STATUSES";
+import { getCourseViewModel } from "./utils/getCourseViewModel";
+
+import type {
+  TCourse,
+  TRequestWithBody,
+  TRequestWithParams,
+  TRequestWithParamsAndBody,
+} from "./types";
+import type { TQueryCoursesModel } from "./models/QueryCoursesModel";
+import type { TCreateCourseModel } from "./models/CreateCourseModel";
+import type { TUpdateCourseModel } from "./models/UpdateCourseModel";
+import type { TCourseViewModel } from "./models/CourseViewModel";
+import type { TParamsCourseIdModel } from "./models/ParamsCourseId.Model";
 
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 5000;
 
 const jsonBodyMiddleware = express.json();
 app.use(jsonBodyMiddleware);
 
-const db = {
+const db: { courses: TCourse[] } = {
   courses: [
-    { id: 1, title: "FRONT-END" },
-    { id: 2, title: "BACK-END" },
-    { id: 3, title: "QA" },
-    { id: 4, title: "Devops" },
+    { id: 1, title: "FRONT-END", students: 10 },
+    { id: 2, title: "BACK-END", students: 1 },
+    { id: 3, title: "QA", students: 15 },
+    { id: 4, title: "Devops", students: 0 },
   ],
 };
 
-app.get("/", (req: Request, res: Response) => {
-  res.status(HTTP_STATUSES.OK_200);
-  res.json({ message: "Hello World!" });
-});
-
-app.get("/courses", (req, res) => {
-  let courses = db.courses;
-
-  if (typeof req.query.title !== "undefined") {
-    courses = courses.filter((course) =>
-      course.title.includes(req.query.title!.toString())
-    );
+app.get(
+  "/",
+  (req: Request<{}, {}, {}, {}>, res: Response<{ message: string }>) => {
+    res.status(HTTP_STATUSES.OK_200);
+    res.json({ message: "Hello World!" });
   }
+);
 
-  res.json(courses);
-});
+app.get(
+  "/courses",
+  (
+    req: Request<{}, {}, {}, TQueryCoursesModel>,
+    res: Response<TCourseViewModel[], {}>
+  ) => {
+    let courses = db.courses;
 
-app.get("/courses/:course_id", (req, res) => {
-  const course = db.courses.find(
-    (course) => course.id === +req.params.course_id
-  );
+    if (typeof req.query.title !== "undefined") {
+      courses = courses.filter((course) =>
+        course.title.includes(req.query.title)
+      );
+    }
 
-  if (!course) {
-    res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-  } else {
-    res.json(course);
+    res.json(courses.map(getCourseViewModel));
   }
-});
+);
 
-app.post("/courses", (req, res) => {
-  if (!req.body.title) {
-    res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
-    return;
-  }
+app.get(
+  "/courses/:id",
+  (
+    req: Request<TParamsCourseIdModel, {}, {}, {}>,
+    res: Response<TCourseViewModel, {}>
+  ) => {
+    const course = db.courses.find((course) => course.id === +req.params.id);
 
-  const course = {
-    id: +new Date(),
-    title: req.body.title,
-  };
-
-  db.courses.push(course);
-  res.status(HTTP_STATUSES.CREATED_201).json(course);
-});
-
-app.delete("/courses/:id", (req, res) => {
-  for (let i = 0; i < db.courses.length; i++) {
-    if (db.courses[i].id === +req.params.id) {
-      db.courses.splice(i, 1);
-      res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-      return;
+    if (!course) {
+      res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+    } else {
+      res.json(getCourseViewModel(course));
     }
   }
+);
 
-  res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-});
+app.post(
+  "/courses",
+  (
+    req: TRequestWithBody<TCreateCourseModel>,
+    res: Response<TCourseViewModel, {}>
+  ) => {
+    if (!req.body.title) {
+      res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
+      return;
+    }
 
-app.put("/courses/:id", (req, res) => {
-  if (!req.body.title) {
-    res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
-    return;
+    const course: TCourse = {
+      id: +new Date(),
+      title: req.body.title,
+      students: 0,
+    };
+
+    db.courses.push(course);
+    res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
   }
+);
 
-  const course = db.courses.find((course) => course.id === +req.params.id);
+app.delete(
+  "/courses/:id",
+  (
+    req: Request<TParamsCourseIdModel, {}, {}, {}>,
+    res: Response<undefined>
+  ) => {
+    for (let i = 0; i < db.courses.length; i++) {
+      if (db.courses[i].id === +req.params.id) {
+        db.courses.splice(i, 1);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+        return;
+      }
+    }
 
-  if (!course) {
     res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-  } else {
-    course.title = req.body.title;
-    res.json(course);
   }
-});
+);
+
+app.put(
+  "/courses/:id",
+  (
+    req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
+    res: Response<TCourseViewModel>
+  ) => {
+    if (!req.body.title) {
+      res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
+      return;
+    }
+
+    const course = db.courses.find((course) => course.id === +req.params.id);
+
+    if (!course) {
+      res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+    } else {
+      course.title = req.body.title;
+      res.json(getCourseViewModel(course));
+    }
+  }
+);
 
 app.delete("/__test__/data", (req, res) => {
   db.courses = [];
