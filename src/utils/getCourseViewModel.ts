@@ -1,5 +1,5 @@
+import type { TCourse } from "../db";
 import type { TCourseViewModel } from "../models/CourseViewModel";
-import type { TCourse } from "../types";
 
 export const getCourseViewModel = (dbCourse: TCourse): TCourseViewModel => {
   return {
