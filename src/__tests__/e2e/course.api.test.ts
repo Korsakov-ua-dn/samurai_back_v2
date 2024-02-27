@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import app from "../..";
+import app from "../../app";
 
 import { HTTP_STATUSES } from "../../HTTP_STATUSES";
 
