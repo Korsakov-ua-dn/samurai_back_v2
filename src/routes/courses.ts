@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import { Express, Request, Response, Router } from "express";
 
 import { TCourse, TDb } from "../db";
 import { getCourseViewModel } from "../utils/getCourseViewModel";
@@ -12,7 +12,7 @@ import type { TCreateCourseModel } from "../models/CreateCourseModel";
 import type { TUpdateCourseModel } from "../models/UpdateCourseModel";
 
 export const getCoursesRouter = (db: TDb) => {
-  const router = express.Router();
+  const router = Router();
 
   router.get(
     "/",
@@ -20,13 +20,7 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<{}, {}, {}, TQueryCoursesModel>,
       res: Response<TCourseViewModel[], {}>
     ) => {
-      let courses = db.courses;
-
-      if (typeof req.query.title !== "undefined") {
-        courses = courses.filter((course) =>
-          course.title.includes(req.query.title)
-        );
-      }
+      let courses = db.findCourses(req.query.title);
 
       res.json(courses.map(getCourseViewModel));
     }
@@ -38,7 +32,7 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<TCourseViewModel, {}>
     ) => {
-      const course = db.courses.find((course) => course.id === +req.params.id);
+      const course = db.findCourse(+req.params.id);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -59,13 +53,7 @@ export const getCoursesRouter = (db: TDb) => {
         return;
       }
 
-      const course: TCourse = {
-        id: +new Date(),
-        title: req.body.title,
-        students: 0,
-      };
-
-      db.courses.push(course);
+      const course = db.addCourse(req.body.title);
       res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
     }
   );
@@ -76,12 +64,10 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<undefined>
     ) => {
-      for (let i = 0; i < db.courses.length; i++) {
-        if (db.courses[i].id === +req.params.id) {
-          db.courses.splice(i, 1);
-          res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-          return;
-        }
+      const result = db.deleteCourse(+req.params.id);
+
+      if (result) {
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
       }
 
       res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -99,12 +85,11 @@ export const getCoursesRouter = (db: TDb) => {
         return;
       }
 
-      const course = db.courses.find((course) => course.id === +req.params.id);
+      const course = db.updateCourse(+req.params.id, req.body.title);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       } else {
-        course.title = req.body.title;
         res.json(getCourseViewModel(course));
       }
     }
