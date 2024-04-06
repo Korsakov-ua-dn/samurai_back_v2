@@ -1,8 +1,10 @@
 import { Request, Response, Router } from "express";
+import { ValidationError, validationResult } from "express-validator";
 
 import { TDb } from "../db";
 import { getCourseViewModel } from "../utils/getCourseViewModel";
 import { HTTP_STATUSES } from "../HTTP_STATUSES";
+import { errors, validation } from "../middlewares";
 
 import type { TQueryCoursesModel } from "../models/QueryCoursesModel";
 import type { TCourseViewModel } from "../models/CourseViewModel";
@@ -44,15 +46,12 @@ export const getCoursesRouter = (db: TDb) => {
 
   router.post(
     "/",
+    validation.title,
+    errors,
     (
       req: TRequestWithBody<TCreateCourseModel>,
-      res: Response<TCourseViewModel, {}>
+      res: Response<TCourseViewModel | { errors: ValidationError[] }, {}>
     ) => {
-      if (!req.body.title) {
-        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
-        return;
-      }
-
       const course = db.addCourse(req.body.title);
       res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
     }
@@ -76,15 +75,12 @@ export const getCoursesRouter = (db: TDb) => {
 
   router.put(
     "/:id",
+    validation.title,
+    errors,
     (
       req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
       res: Response<TCourseViewModel>
     ) => {
-      if (!req.body.title) {
-        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
-        return;
-      }
-
       const course = db.updateCourse(+req.params.id, req.body.title);
 
       if (!course) {
