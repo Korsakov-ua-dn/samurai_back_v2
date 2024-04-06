@@ -1,6 +1,6 @@
-import { Express, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 
-import { TCourse, TDb } from "../db";
+import { TDb } from "../db";
 import { getCourseViewModel } from "../utils/getCourseViewModel";
 import { HTTP_STATUSES } from "../HTTP_STATUSES";
 

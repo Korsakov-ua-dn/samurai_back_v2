@@ -4,11 +4,14 @@ import { HTTP_STATUSES } from "./HTTP_STATUSES";
 import { getCoursesRouter } from "./routes/courses";
 import { getTestsRouter } from "./routes/tests";
 import { db } from "./db";
+import { authGuard } from "./middleware";
 
 const app = express();
 
 const jsonBodyMiddleware = express.json();
+
 app.use(jsonBodyMiddleware);
+app.use(authGuard);
 
 app.get(
   "/",
