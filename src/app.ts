@@ -4,7 +4,7 @@ import { HTTP_STATUSES } from "./HTTP_STATUSES";
 import { getCoursesRouter } from "./routes/courses";
 import { getTestsRouter } from "./routes/tests";
 import { db } from "./db";
-import { authGuard } from "./middleware";
+import { authGuard } from "./middlewares";
 
 const app = express();
 
