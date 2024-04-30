@@ -18,11 +18,11 @@ export const getCoursesRouter = (db: TDb) => {
 
   router.get(
     "/",
-    (
+    async (
       req: Request<{}, {}, {}, TQueryCoursesModel>,
       res: Response<TCourseViewModel[], {}>
     ) => {
-      let courses = db.findCourses(req.query.title);
+      let courses = await db.findCourses(req.query.title);
 
       res.json(courses.map(getCourseViewModel));
     }
@@ -30,11 +30,11 @@ export const getCoursesRouter = (db: TDb) => {
 
   router.get(
     "/:id([0-9]+)",
-    (
+    async (
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<TCourseViewModel, {}>
     ) => {
-      const course = db.findCourse(+req.params.id);
+      const course = await db.findCourse(+req.params.id);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -48,22 +48,22 @@ export const getCoursesRouter = (db: TDb) => {
     "/",
     validation.title,
     errors,
-    (
+    async (
       req: TRequestWithBody<TCreateCourseModel>,
       res: Response<TCourseViewModel | { errors: ValidationError[] }, {}>
     ) => {
-      const course = db.addCourse(req.body.title);
+      const course = await db.addCourse(req.body.title);
       res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
     }
   );
 
   router.delete(
     "/:id",
-    (
+    async (
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<undefined>
     ) => {
-      const result = db.deleteCourse(+req.params.id);
+      const result = await db.deleteCourse(+req.params.id);
 
       if (result) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -77,11 +77,11 @@ export const getCoursesRouter = (db: TDb) => {
     "/:id",
     validation.title,
     errors,
-    (
+    async (
       req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
       res: Response<TCourseViewModel>
     ) => {
-      const course = db.updateCourse(+req.params.id, req.body.title);
+      const course = await db.updateCourse(+req.params.id, req.body.title);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
