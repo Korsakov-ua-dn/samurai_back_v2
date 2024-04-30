@@ -18,7 +18,7 @@ export const dbData: TDbData = {
 export type TDb = typeof db;
 
 export const db = {
-  findCourses: (title: string | undefined) => {
+  findCourses: async (title: string | undefined): Promise<TCourse[]> => {
     let courses = dbData.courses;
 
     if (typeof title !== "undefined") {
@@ -28,13 +28,13 @@ export const db = {
     return courses;
   },
 
-  findCourse: (id: number) => {
+  findCourse: async (id: number): Promise<TCourse | undefined> => {
     const course = dbData.courses.find((course) => course.id === id);
 
     return course;
   },
 
-  addCourse: (title: string) => {
+  addCourse: async (title: string): Promise<TCourse> => {
     const course: TCourse = {
       id: +new Date(),
       title,
@@ -46,7 +46,7 @@ export const db = {
     return course;
   },
 
-  deleteCourse: (id: number) => {
+  deleteCourse: async (id: number): Promise<boolean> => {
     for (let i = 0; i < dbData.courses.length; i++) {
       if (dbData.courses[i].id === id) {
         dbData.courses.splice(i, 1);
@@ -57,7 +57,10 @@ export const db = {
     return false;
   },
 
-  updateCourse: (id: number, title: string) => {
+  updateCourse: async (
+    id: number,
+    title: string
+  ): Promise<TCourse | undefined> => {
     const course = dbData.courses.find((course) => course.id === id);
 
     if (!course) {
@@ -68,7 +71,7 @@ export const db = {
     }
   },
 
-  deleteAllCourses: () => {
+  deleteAllCourses: async (): Promise<void> => {
     dbData.courses = [];
   },
 };
