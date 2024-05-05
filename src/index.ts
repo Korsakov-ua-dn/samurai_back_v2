@@ -3,7 +3,7 @@ import { runDb } from "./db";
 
 const port = process.env.PORT || 5000;
 
-const startApp = async () => {
+export const startApp = async () => {
   await runDb();
 
   app.listen(port, () => {
@@ -11,4 +11,4 @@ const startApp = async () => {
   });
 };
 
-export default startApp();
+startApp();
