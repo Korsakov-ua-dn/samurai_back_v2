@@ -1,7 +1,6 @@
 import { Request, Response, Router } from "express";
 import { ValidationError, validationResult } from "express-validator";
 
-import { TDb } from "../db";
 import { getCourseViewModel } from "../utils/getCourseViewModel";
 import { HTTP_STATUSES } from "../HTTP_STATUSES";
 import { errors, validation } from "../middlewares";
@@ -12,8 +11,9 @@ import type { TParamsCourseIdModel } from "../models/ParamsCourseId.Model";
 import type { TRequestWithBody, TRequestWithParamsAndBody } from "../types";
 import type { TCreateCourseModel } from "../models/CreateCourseModel";
 import type { TUpdateCourseModel } from "../models/UpdateCourseModel";
+import type { TDbMethods } from "../db";
 
-export const getCoursesRouter = (db: TDb) => {
+export const getCoursesRouter = (dbMethods: TDbMethods) => {
   const router = Router();
 
   router.get(
@@ -22,7 +22,7 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<{}, {}, {}, TQueryCoursesModel>,
       res: Response<TCourseViewModel[], {}>
     ) => {
-      let courses = await db.findCourses(req.query.title);
+      let courses = await dbMethods.findCourses(req.query.title);
 
       res.json(courses.map(getCourseViewModel));
     }
@@ -34,7 +34,7 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<TCourseViewModel, {}>
     ) => {
-      const course = await db.findCourse(+req.params.id);
+      const course = await dbMethods.findCourse(+req.params.id);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -52,7 +52,7 @@ export const getCoursesRouter = (db: TDb) => {
       req: TRequestWithBody<TCreateCourseModel>,
       res: Response<TCourseViewModel | { errors: ValidationError[] }, {}>
     ) => {
-      const course = await db.addCourse(req.body.title);
+      const course = await dbMethods.addCourse(req.body.title);
       res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
     }
   );
@@ -63,13 +63,13 @@ export const getCoursesRouter = (db: TDb) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<undefined>
     ) => {
-      const result = await db.deleteCourse(+req.params.id);
+      const result = await dbMethods.deleteCourse(+req.params.id);
 
       if (result) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+      } else {
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       }
-
-      res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
   );
 
@@ -81,7 +81,10 @@ export const getCoursesRouter = (db: TDb) => {
       req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
       res: Response<TCourseViewModel>
     ) => {
-      const course = await db.updateCourse(+req.params.id, req.body.title);
+      const course = await dbMethods.updateCourse(
+        +req.params.id,
+        req.body.title
+      );
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);

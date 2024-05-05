@@ -3,8 +3,9 @@ import express, { Request, Response } from "express";
 import { HTTP_STATUSES } from "./HTTP_STATUSES";
 import { getCoursesRouter } from "./routes/courses";
 import { getTestsRouter } from "./routes/tests";
-import { db } from "./db";
 import { authGuard } from "./middlewares";
+// import { dbMethods } from "./db/MOCK";
+import { dbMethods } from "./db";
 
 const app = express();
 
@@ -21,8 +22,8 @@ app.get(
   }
 );
 
-app.use("/courses", getCoursesRouter(db));
+app.use("/courses", getCoursesRouter(dbMethods));
 
-app.use("/__test__", getTestsRouter(db));
+app.use("/__test__", getTestsRouter(dbMethods));
 
 export default app;
