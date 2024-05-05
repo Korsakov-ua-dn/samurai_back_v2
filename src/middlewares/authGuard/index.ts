@@ -6,6 +6,6 @@ export const authGuard = (req: Request, res: Response, next: NextFunction) => {
   if (req.query.token) {
     next();
   } else {
-    res.send(HTTP_STATUSES.UNAUTHORIZED_401);
+    res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
   }
 };
