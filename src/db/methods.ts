@@ -13,22 +13,14 @@ export const dbMethods = {
     return coursesCollection.find(filter).toArray();
   },
 
-  findCourse: async (id: number): Promise<TCourse | undefined> => {
+  findCourse: async (id: number): Promise<TCourse | null> => {
     const course = await coursesCollection.findOne({ id });
 
-    if (course) {
-      return course;
-    }
+    return course;
   },
 
-  addCourse: async (title: string): Promise<TCourse> => {
-    const draftCourse: TCourse = {
-      id: +new Date(),
-      title,
-      students: 0,
-    };
-
-    const course = await coursesCollection.insertOne(draftCourse);
+  addCourse: async (draftCourse: TCourse): Promise<TCourse> => {
+    const result = await coursesCollection.insertOne(draftCourse);
 
     return draftCourse;
   },

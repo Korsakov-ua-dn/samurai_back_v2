@@ -3,19 +3,19 @@ import { runDb } from "./db";
 
 const port = process.env.PORT || 5000;
 
-// const startApp = async () => {
-//   await runDb();
+const startApp = async () => {
+  await runDb();
 
-//   app.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`);
-//   });
-// };
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+  });
+};
 
-// startApp();
+startApp();
 
 /**
  * For vercel with MOCK dbMethods
  */
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Example app listening on port ${port}`);
+// });

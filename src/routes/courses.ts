@@ -7,13 +7,15 @@ import { errors, validation } from "../middlewares";
 
 import type { TQueryCoursesModel } from "../models/QueryCoursesModel";
 import type { TCourseViewModel } from "../models/CourseViewModel";
-import type { TParamsCourseIdModel } from "../models/ParamsCourseId.Model";
-import type { TRequestWithBody, TRequestWithParamsAndBody } from "../types";
+import type { TParamsCourseIdModel } from "../models/ParamsCourseIdModel";
 import type { TCreateCourseModel } from "../models/CreateCourseModel";
 import type { TUpdateCourseModel } from "../models/UpdateCourseModel";
-import type { TDbMethods } from "../db";
+import type { TRequestWithBody, TRequestWithParamsAndBody } from "../types";
+import type { TCourcesServise } from "../domain/courses-services";
 
-export const getCoursesRouter = (dbMethods: TDbMethods) => {
+import { dbMethods } from "../db/MOCK";
+
+export const getCoursesRouter = (courcesService: TCourcesServise) => {
   const router = Router();
 
   router.get(
@@ -22,7 +24,7 @@ export const getCoursesRouter = (dbMethods: TDbMethods) => {
       req: Request<{}, {}, {}, TQueryCoursesModel>,
       res: Response<TCourseViewModel[], {}>
     ) => {
-      let courses = await dbMethods.findCourses(req.query.title);
+      let courses = await courcesService.findCourses(req.query.title);
 
       res.json(courses.map(getCourseViewModel));
     }
@@ -34,7 +36,7 @@ export const getCoursesRouter = (dbMethods: TDbMethods) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<TCourseViewModel, {}>
     ) => {
-      const course = await dbMethods.findCourse(+req.params.id);
+      const course = await courcesService.findCourse(+req.params.id);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -52,7 +54,7 @@ export const getCoursesRouter = (dbMethods: TDbMethods) => {
       req: TRequestWithBody<TCreateCourseModel>,
       res: Response<TCourseViewModel | { errors: ValidationError[] }, {}>
     ) => {
-      const course = await dbMethods.addCourse(req.body.title);
+      const course = await courcesService.addCourse(req.body.title);
       res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
     }
   );
@@ -63,7 +65,7 @@ export const getCoursesRouter = (dbMethods: TDbMethods) => {
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
       res: Response<undefined>
     ) => {
-      const result = await dbMethods.deleteCourse(+req.params.id);
+      const result = await courcesService.deleteCourse(+req.params.id);
 
       if (result) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -81,7 +83,7 @@ export const getCoursesRouter = (dbMethods: TDbMethods) => {
       req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
       res: Response<TCourseViewModel>
     ) => {
-      const course = await dbMethods.updateCourse(
+      const course = await courcesService.updateCourse(
         +req.params.id,
         req.body.title
       );
