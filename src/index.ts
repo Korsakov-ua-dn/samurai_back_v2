@@ -1,5 +1,5 @@
 import app from "./app";
-import { runDb } from "./db";
+import { runDb } from "./mongodb";
 
 const port = process.env.PORT || 5000;
 

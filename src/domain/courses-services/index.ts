@@ -1,6 +1,6 @@
-import { TCourse, dbMethods } from "../db";
+import { dbMethods } from "../../mongodb";
 
-export type TCourcesServise = typeof courcesService;
+import type { TCourse } from "./types";
 
 export const courcesService = {
   findCourses: async (title: string | undefined): Promise<TCourse[]> => {

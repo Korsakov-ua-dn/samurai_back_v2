@@ -1,6 +1,7 @@
 import { coursesCollection } from "./collections";
+import { mapDbCourseModel } from "./utils/mapDbCourseModel";
 
-import type { TCourse } from "./types";
+import type { TCourse } from "../domain/courses-services/types";
 
 export const dbMethods = {
   findCourses: async (title: string | undefined): Promise<TCourse[]> => {
@@ -10,13 +11,17 @@ export const dbMethods = {
       filter.title = { $regex: title };
     }
 
-    return coursesCollection.find(filter).toArray();
+    const courses = await coursesCollection.find(filter).toArray();
+
+    const mappedCourses = courses.map(mapDbCourseModel);
+
+    return mappedCourses;
   },
 
   findCourse: async (id: number): Promise<TCourse | null> => {
     const course = await coursesCollection.findOne({ id });
 
-    return course;
+    return course ? mapDbCourseModel(course) : course;
   },
 
   addCourse: async (draftCourse: TCourse): Promise<TCourse> => {
@@ -47,7 +52,7 @@ export const dbMethods = {
     const course = await coursesCollection.findOne({ id });
 
     if (course) {
-      return course;
+      return mapDbCourseModel(course);
     }
   },
 
