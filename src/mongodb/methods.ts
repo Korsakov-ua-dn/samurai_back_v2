@@ -1,17 +1,26 @@
 import { coursesCollection } from "./collections";
 import { mapDbCourseModel } from "./utils/mapDbCourseModel";
+import { getDbSortParam } from "./utils/getDbSortParam";
+import { getNumberFromQuery } from "./utils/getNumberFromQuery";
+import { LIMIT } from "./config";
 
 import type { TCourse } from "../domain/courses-services/types";
+import type { TCourseFilters } from "../routes/models/CourseFilters";
 
 export const dbMethods = {
-  findCourses: async (title: string | undefined): Promise<TCourse[]> => {
-    const filter: Partial<Record<keyof TCourse, any>> = {};
+  findCourses: async (props: TCourseFilters): Promise<TCourse[]> => {
+    const search: Partial<Record<keyof TCourse, any>> = {};
 
-    if (typeof title !== "undefined") {
-      filter.title = { $regex: title };
+    if (typeof props.title !== "undefined") {
+      search.title = { $regex: props.title };
     }
 
-    const courses = await coursesCollection.find(filter).toArray();
+    const courses = await coursesCollection
+      .find(search)
+      .limit(getNumberFromQuery(props.limit) ?? LIMIT)
+      .skip(getNumberFromQuery(props.offset) ?? 0)
+      .sort(getDbSortParam(props.sort))
+      .toArray();
 
     const mappedCourses = courses.map(mapDbCourseModel);
 

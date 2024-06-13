@@ -1,8 +1,8 @@
-import { Express, Request, Response, Router } from "express";
+import { Router } from "express";
 
 import { HTTP_STATUSES } from "../HTTP_STATUSES";
 
-import type { TCourcesServise } from "../domain/courses-services";
+import type { TCourcesServise } from "../domain/courses-services/types";
 
 export const getTestsRouter = (courcesService: TCourcesServise) => {
   const router = Router();

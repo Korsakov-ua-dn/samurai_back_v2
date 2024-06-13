@@ -1,10 +1,11 @@
 import { dbMethods } from "../../mongodb";
 
 import type { TCourse } from "./types";
+import type { TCourseFilters } from "../../routes/models/CourseFilters";
 
 export const courcesService = {
-  findCourses: async (title: string | undefined): Promise<TCourse[]> => {
-    return dbMethods.findCourses(title);
+  findCourses: async (props: TCourseFilters): Promise<TCourse[]> => {
+    return dbMethods.findCourses(props);
   },
 
   findCourse: async (id: number): Promise<TCourse | null> => {

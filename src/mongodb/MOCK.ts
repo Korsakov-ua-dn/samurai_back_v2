@@ -1,4 +1,4 @@
-import type { TCourse } from "./types";
+import type { TCourse } from "../domain/courses-services/types";
 
 export type TDbData = { courses: TCourse[] };
 

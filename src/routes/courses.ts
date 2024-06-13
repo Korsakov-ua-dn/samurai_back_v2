@@ -1,17 +1,18 @@
 import { Request, Response, Router } from "express";
 import { ValidationError, validationResult } from "express-validator";
 
-import { getCourseViewModel } from "./utils/getCourseViewModel";
 import { HTTP_STATUSES } from "../HTTP_STATUSES";
 import { errors, validation } from "../middlewares";
 
-import type { TQueryCoursesModel } from "./models/QueryCoursesModel";
-import type { TCourseViewModel } from "./models/CourseViewModel";
+import type { TCourseFilters } from "./models/CourseFilters";
 import type { TParamsCourseIdModel } from "./models/ParamsCourseIdModel";
 import type { TCreateCourseModel } from "./models/CreateCourseModel";
 import type { TUpdateCourseModel } from "./models/UpdateCourseModel";
 import type { TRequestWithBody, TRequestWithParamsAndBody } from "../types";
-import type { TCourcesServise } from "../domain/courses-services/types";
+import type {
+  TCourcesServise,
+  TCourse,
+} from "../domain/courses-services/types";
 
 import { dbMethods } from "../mongodb/MOCK";
 
@@ -21,12 +22,12 @@ export const getCoursesRouter = (courcesService: TCourcesServise) => {
   router.get(
     "/",
     async (
-      req: Request<{}, {}, {}, TQueryCoursesModel>,
-      res: Response<TCourseViewModel[], {}>
+      req: Request<{}, {}, {}, TCourseFilters>,
+      res: Response<TCourse[], {}>
     ) => {
-      let courses = await courcesService.findCourses(req.query.title);
+      let courses = await courcesService.findCourses(req.query);
 
-      res.json(courses.map(getCourseViewModel));
+      res.json(courses);
     }
   );
 
@@ -34,14 +35,14 @@ export const getCoursesRouter = (courcesService: TCourcesServise) => {
     "/:id([0-9]+)",
     async (
       req: Request<TParamsCourseIdModel, {}, {}, {}>,
-      res: Response<TCourseViewModel, {}>
+      res: Response<TCourse, {}>
     ) => {
       const course = await courcesService.findCourse(+req.params.id);
 
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       } else {
-        res.json(getCourseViewModel(course));
+        res.json(course);
       }
     }
   );
@@ -52,10 +53,10 @@ export const getCoursesRouter = (courcesService: TCourcesServise) => {
     errors,
     async (
       req: TRequestWithBody<TCreateCourseModel>,
-      res: Response<TCourseViewModel | { errors: ValidationError[] }, {}>
+      res: Response<TCourse | { errors: ValidationError[] }, {}>
     ) => {
       const course = await courcesService.addCourse(req.body.title);
-      res.status(HTTP_STATUSES.CREATED_201).json(getCourseViewModel(course));
+      res.status(HTTP_STATUSES.CREATED_201).json(course);
     }
   );
 
@@ -81,7 +82,7 @@ export const getCoursesRouter = (courcesService: TCourcesServise) => {
     errors,
     async (
       req: TRequestWithParamsAndBody<TParamsCourseIdModel, TUpdateCourseModel>,
-      res: Response<TCourseViewModel>
+      res: Response<TCourse>
     ) => {
       const course = await courcesService.updateCourse(
         +req.params.id,
@@ -91,7 +92,7 @@ export const getCoursesRouter = (courcesService: TCourcesServise) => {
       if (!course) {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
       } else {
-        res.json(getCourseViewModel(course));
+        res.json(course);
       }
     }
   );
